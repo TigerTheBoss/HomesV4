@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.PaperCommandManager;
 import org.incendo.cloud.paper.util.sender.PaperSimpleSenderMapper;
@@ -42,9 +43,9 @@ public class SlimecraftHomesPlugin extends JavaPlugin {
         final PaperCommandManager<Source> commandManager = PaperCommandManager.builder(PaperSimpleSenderMapper.simpleSenderMapper())
                 .executionCoordinator(ExecutionCoordinator.simpleCoordinator())
                 .buildOnEnable(this);
-
-        new SlimecraftHomesCommand(userService, playerService, this, this.getServer().getScheduler()).registerCommand(commandManager);
+        final BukkitScheduler bukkitScheduler = this.getServer().getScheduler();
+        new SlimecraftHomesCommand(userService, playerService, this, bukkitScheduler).registerCommand(commandManager);
         this.getServer().getPluginManager().registerEvents(new BedrockInventoryHolderListener(), this);
-        this.getServer().getPluginManager().registerEvents(new PlayerListener(userService), this);
+        this.getServer().getPluginManager().registerEvents(new PlayerListener(userService, playerService, bukkitScheduler, this), this);
     }
 }

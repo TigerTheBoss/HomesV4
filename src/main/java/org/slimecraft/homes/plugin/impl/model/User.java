@@ -8,14 +8,24 @@ import java.util.UUID;
 public class User implements Identifiable<UUID> {
     private final UUID identifier;
     private List<Home> homes;
+    private boolean creatingHome;
 
     public User(UUID identifier) {
         this.identifier = identifier;
     }
 
-    public User(UUID identifier, List<Home> homes) {
+    public User(UUID identifier, List<Home> homes, boolean creatingHome) {
         this.identifier = identifier;
         this.homes = homes;
+        this.creatingHome = creatingHome;
+    }
+
+    public boolean isCreatingHome() {
+        return creatingHome;
+    }
+
+    public void setCreatingHome(boolean creatingHome) {
+        this.creatingHome = creatingHome;
     }
 
     public List<Home> getHomes() {

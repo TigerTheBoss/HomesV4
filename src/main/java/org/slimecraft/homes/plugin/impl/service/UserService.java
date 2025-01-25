@@ -15,5 +15,9 @@ public interface UserService {
 
     CompletableFuture<List<Home>> getHomes(UUID key);
 
-    CompletableFuture<Boolean> userExists(UUID key);
+    CompletableFuture<Boolean> isCreatingHome(UUID key);
+
+    void setCreatingHome(UUID key, boolean creatingHome);
+
+    CompletableFuture<Boolean> exists(UUID key);
 }

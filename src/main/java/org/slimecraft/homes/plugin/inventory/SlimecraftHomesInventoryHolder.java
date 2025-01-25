@@ -4,27 +4,31 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.slimecraft.bedrock.inventory.BedrockInventoryHolder;
 import org.slimecraft.bedrock.inventory.button.Button;
 import org.slimecraft.homes.plugin.impl.model.Home;
 import org.slimecraft.homes.plugin.impl.service.PlayerService;
 import org.slimecraft.homes.plugin.impl.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 public class SlimecraftHomesInventoryHolder extends BedrockInventoryHolder {
-    public SlimecraftHomesInventoryHolder(List<Home> homes, PlayerService playerService) {
+    public SlimecraftHomesInventoryHolder(List<Home> homes, PlayerService playerService, UserService userService) {
         super(9, Component.text("Homes"));
+
+        final ItemStack createItemStack = ItemStack.of(Material.LIME_CONCRETE);
+        createItemStack.setData(DataComponentTypes.ITEM_NAME, Component.text("Create").color(NamedTextColor.GREEN));
 
         final ItemStack viewItemStack = ItemStack.of(Material.ENDER_EYE);
         viewItemStack.setData(DataComponentTypes.ITEM_NAME, Component.text("View").color(NamedTextColor.YELLOW));
 
+        this.addButton(new Button(0, createItemStack, (bedrockInventoryHolder, player) -> {
+            final UUID identifier = player.getUniqueId();
+            player.closeInventory();
+            userService.setCreatingHome(identifier, true);
+        }, false));
         this.addButton(new Button(4, viewItemStack, (bedrockInventoryHolder, player) -> player.openInventory(new SlimecraftHomesViewInventoryHolder(homes, playerService, 1, this).getInventory()), false));
     }
 

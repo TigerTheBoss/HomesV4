@@ -21,8 +21,9 @@ public class SqlUserDao implements Dao<UUID, User> {
     @Override
     public void create(User type) {
         try (final Connection connection = this.dataSource.getConnection()) {
-            try (final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO slimecrafthomes_user(identifier) VALUES (?)")) {
+            try (final PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO slimecrafthomes_user(identifier, creatingHome) VALUES (?, ?)")) {
                 preparedStatement.setString(1, type.getIdentifier().toString());
+                preparedStatement.setBoolean(2, type.isCreatingHome());
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -38,7 +39,8 @@ public class SqlUserDao implements Dao<UUID, User> {
                 preparedStatement.setString(1, key.toString());
                 try (final ResultSet results = preparedStatement.executeQuery()) {
                     while (results.next()) {
-                        user = new User(key);
+                        final boolean creatingHome = results.getBoolean("creatingHome");
+                        user = new User(key, null, creatingHome);
                     }
                 }
             }
@@ -51,8 +53,10 @@ public class SqlUserDao implements Dao<UUID, User> {
     @Override
     public void update(UUID key, User type) {
         try (final Connection connection = this.dataSource.getConnection()) {
-            try (final PreparedStatement preparedStatement = connection.prepareStatement("")) {
-
+            try (final PreparedStatement preparedStatement = connection.prepareStatement("UPDATE slimecrafthomes_user SET creatingHome = ? WHERE identifier = ?")) {
+                preparedStatement.setBoolean(1, type.isCreatingHome());
+                preparedStatement.setString(2, key.toString());
+                preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();

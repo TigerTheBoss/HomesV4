@@ -1,6 +1,5 @@
 package org.slimecraft.homes.plugin.impl.service;
 
-import io.papermc.paper.entity.TeleportFlag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -15,6 +14,11 @@ import java.util.UUID;
 public class PlayerServiceImpl implements PlayerService {
 
     @Override
+    public void sendHomeCreatedConfirmation(Player player, Home home) {
+        player.sendMessage(Component.text("Created home ").append(Component.text(home.getName()).color(NamedTextColor.YELLOW)));
+    }
+
+    @Override
     public void teleportPlayerToHome(Player player, Home home) {
         Location homeLocation = home.getSafeLocation().toRegularLocation();
 
@@ -25,8 +29,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public void showHomesInventory(Player player, List<Home> homes) {
-        player.openInventory(new SlimecraftHomesInventoryHolder(homes, this).getInventory());
+    public void showHomesInventory(Player player, List<Home> homes, UserService userService) {
+        player.openInventory(new SlimecraftHomesInventoryHolder(homes, this, userService).getInventory());
     }
 
     @Override

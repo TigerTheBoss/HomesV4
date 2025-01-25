@@ -62,7 +62,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CompletableFuture<Boolean> userExists(UUID key) {
+    public CompletableFuture<Boolean> isCreatingHome(UUID key) {
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<User> userOptional = this.userDao.get(key);
+            if (userOptional.isEmpty()) return false;
+            User user = userOptional.get();
+
+            return user.isCreatingHome();
+        });
+    }
+
+    @Override
+    public void setCreatingHome(UUID key, boolean creatingHome) {
+        CompletableFuture.runAsync(() -> {
+            Optional<User> userOptional = this.userDao.get(key);
+            if (userOptional.isEmpty()) return;
+            User user = userOptional.get();
+            user.setCreatingHome(creatingHome);
+            this.userDao.update(key, user);
+        });
+    }
+
+    @Override
+    public CompletableFuture<Boolean> exists(UUID key) {
         return CompletableFuture.supplyAsync(() -> this.userDao.get(key).isPresent());
     }
 }

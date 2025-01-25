@@ -1,10 +1,12 @@
 package org.slimecraft.homes.plugin.command;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.bukkit.parser.OfflinePlayerParser;
 import org.incendo.cloud.key.CloudKey;
 import org.incendo.cloud.meta.CommandMeta;
 import org.incendo.cloud.paper.util.sender.PlayerSource;
@@ -31,6 +33,8 @@ public class SlimecraftHomesCommand {
 
     public void registerCommand(CommandManager<Source> commandManager) {
         final CloudKey<String> NAME_KEY = CloudKey.of("name", String.class);
+        final CloudKey<OfflinePlayer> OTHER_KEY = CloudKey.of("other", OfflinePlayer.class);
+
         final Command.Builder<Source> builder = Command.newBuilder("slimecrafthomes", CommandMeta.empty());
         final Command.Builder<PlayerSource> create = builder
                 .senderType(PlayerSource.class)
@@ -76,12 +80,20 @@ public class SlimecraftHomesCommand {
                 .literal("view")
                 .handler(commandContext -> {
                     final Player player = commandContext.sender().source();
-                    this.userService.getHomes(player.getUniqueId()).thenAcceptAsync(homes -> this.bukkitScheduler.runTask(this.plugin, () -> this.playerService.showHomesInventory(player, homes)));
+                    this.userService.getHomes(player.getUniqueId()).thenAcceptAsync(homes -> this.bukkitScheduler.runTask(this.plugin, () -> this.playerService.showHomesInventory(player, homes, userService)));
+                });
+        final Command.Builder<PlayerSource> viewOther = view
+                .required(OTHER_KEY, OfflinePlayerParser.offlinePlayerParser())
+                .handler(commandContext -> {
+                    final Player player = commandContext.sender().source();
+                    final OfflinePlayer other = commandContext.get(OTHER_KEY);
+                    this.userService.getHomes(other.getUniqueId()).thenAcceptAsync(homes -> this.bukkitScheduler.runTask(this.plugin, () -> this.playerService.showHomesInventory(player, homes, userService)));
                 });
 
         commandManager.command(create);
         commandManager.command(list);
         commandManager.command(delete);
         commandManager.command(view);
+        commandManager.command(viewOther);
     }
 }
