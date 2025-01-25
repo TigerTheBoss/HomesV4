@@ -1,0 +1,5 @@
+name: 'Slimecraft-Homes'
+version: '1.0'
+main: 'org.slimecraft.homes.plugin.SlimecraftHomesPlugin'
+api-version: '1.21.4'
+loader: 'org.slimecraft.homes.plugin.SlimecraftHomesPluginLoader'
