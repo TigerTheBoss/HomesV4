@@ -25,7 +25,7 @@ public class SqlDataSourceService implements DataSourceService {
                 statement.executeBatch();
             }
         } catch (SQLException e) {
-
+            e.printStackTrace();
         }
     }
 

@@ -20,7 +20,9 @@ import org.slimecraft.homes.plugin.impl.model.Home;
 import org.slimecraft.homes.plugin.impl.model.User;
 import org.slimecraft.homes.plugin.impl.service.*;
 import org.slimecraft.homes.plugin.listener.PlayerListener;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
+import java.nio.file.Path;
 import java.util.UUID;
 
 public class SlimecraftHomesPlugin extends JavaPlugin {
@@ -28,7 +30,7 @@ public class SlimecraftHomesPlugin extends JavaPlugin {
     public void onEnable() {
         final HikariConfig hikariConfig = new HikariConfig();
 
-        hikariConfig.setJdbcUrl("jdbc:mysql://localhost:3306/mysql");
+        hikariConfig.setJdbcUrl("jdbc:mysql://localhost:3306/slimecrafthomes");
         hikariConfig.setUsername("root");
         hikariConfig.setPassword("123");
         final HikariDataSource dataSource = new HikariDataSource(hikariConfig);
@@ -39,11 +41,16 @@ public class SlimecraftHomesPlugin extends JavaPlugin {
         final Dao<UUID, Home> homeDao = new SqlHomeDao(dataSource, new Gson());
         final MappedDao<UUID, Home> userHomeMappedDao = new SqlUserHomeMappedDao(dataSource);
         final UserService userService = new UserServiceImpl(userDao, homeDao, userHomeMappedDao);
-        final PlayerService playerService = new PlayerServiceImpl();
+        this.saveResource("config.yml", false);
+        final YamlConfigurationLoader configurationLoader = YamlConfigurationLoader.builder()
+                .path(this.getDataPath().resolve("config.yml"))
+                .build();
+        final ConfigurationService configurationService = new ConfigurationServiceImpl(configurationLoader);
+        final BukkitScheduler bukkitScheduler = this.getServer().getScheduler();
+        final PlayerService playerService = new PlayerServiceImpl(this, configurationService.getTeleportWaitTime());
         final PaperCommandManager<Source> commandManager = PaperCommandManager.builder(PaperSimpleSenderMapper.simpleSenderMapper())
                 .executionCoordinator(ExecutionCoordinator.simpleCoordinator())
                 .buildOnEnable(this);
-        final BukkitScheduler bukkitScheduler = this.getServer().getScheduler();
         new SlimecraftHomesCommand(userService, playerService, this, bukkitScheduler).registerCommand(commandManager);
         this.getServer().getPluginManager().registerEvents(new BedrockInventoryHolderListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerListener(userService, playerService, bukkitScheduler, this), this);

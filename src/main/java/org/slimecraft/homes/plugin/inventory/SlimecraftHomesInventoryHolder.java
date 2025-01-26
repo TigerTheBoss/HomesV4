@@ -64,7 +64,10 @@ public class SlimecraftHomesInventoryHolder extends BedrockInventoryHolder {
                 final Material type = home.getSafeLocation().toRegularLocation().getBlock().getType();
                 final ItemStack homeItemStack = ItemStack.of(!type.isEmpty() && type.isItem() ? type : Material.BEDROCK);
                 homeItemStack.setData(DataComponentTypes.ITEM_NAME, Component.text(home.getName()).color(NamedTextColor.GREEN));
-                this.addButton(new Button(i, homeItemStack, (bedrockInventoryHolder, player) -> playerService.teleportPlayerToHome(player, home), false));
+                this.addButton(new Button(i, homeItemStack, (bedrockInventoryHolder, player) -> {
+                    playerService.teleportPlayerToHome(player, home);
+                    player.closeInventory();
+                }, false));
             }
         }
     }
